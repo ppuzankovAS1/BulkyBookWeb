@@ -1,0 +1,36 @@
+﻿@model IEnumerable<Product>
+<div class="container">
+<div class="row pb-3 pt-3">
+    @foreach (var obj in Model)
+    {
+        <div class="col-lg-3 col-md-6 p-4">
+            <div class="p-1" style="border:1px solid lightblue; border-radius: 5px;">
+                <div class="card" >
+                    <div class="row">
+                        <img src="@obj.ImageUrl" />
+                    </div>
+                    <div class="p-2">
+                        <div class="row">
+                            <label class="h5 text-primary">@obj.Title</label>
+                        </div>
+                        <div class="row">
+                            <label class="text-info">by @obj.Author</label>
+                        </div>
+                        <div class="row">
+                            <label>List Price: <del>@obj.ListPrice.ToString("0.00")</del></label>
+                        </div>
+                        <div class="row">
+                            <label>As Low As: @obj.Price100.ToString("0.00")</label>
+                        </div>
+                    </div>
+                        <div>
+                            <a asp-controller="Home" asp-action="Details" asp-route-id="@obj.Id"
+                           class="btn btn-primary form-control">Details</a>
+                        </div>
+                </div>
+            </div>
+        </div>
+
+    }
+</div>
+</div>
