@@ -7,26 +7,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-           <!-- <Compile Remove="Areas\**" />
-            <Compile Remove="Views\**" />
-            <Content Remove="Areas\**" />
-            <Content Remove="Views\**" />
-            <EmbeddedResource Remove="Areas\**" />
-            <EmbeddedResource Remove="Views\**" />
-            <None Remove="Areas\**" />
-            <None Remove="Views\**" />-->
-  </ItemGroup>
-
-  <ItemGroup>
-    <Compile Remove="CategoryController.cs" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Content Remove="_ViewImports.cshtml" />
-    <Content Remove="_ViewStart.cshtml" />
-  </ItemGroup>
-
-  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNet.Mvc" Version="5.2.9" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.Facebook" Version="6.0.8" />
     <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="6.0.7" />
     <PackageReference Include="Microsoft.AspNetCore.Identity.UI" Version="6.0.7" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Razor.RuntimeCompilation" Version="6.0.7" />
@@ -36,14 +18,17 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="6.0.7" />
+    <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="6.0.8" />
+    <PackageReference Include="Stripe.net" Version="40.5.0" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\BulkyBook.DataAccess\BulkyBook.DataAccess.csproj" />
+    <ProjectReference Include="..\BulkyBook.Utility\BulkyBook.Utility.csproj" />
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="Areas\Identity\Data\" />
     <Folder Include="wwwroot\images\products\" />
   </ItemGroup>
 

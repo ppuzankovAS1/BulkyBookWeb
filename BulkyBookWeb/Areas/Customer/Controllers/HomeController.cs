@@ -1,10 +1,12 @@
 ﻿
 using BulkyBook.DataAccess.Repository.IRepository;
 using BulkyBook.Models;
-using BulkyBook.Models.ViewModels;
+using BulkyBook.Utility;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using System.Diagnostics;
+using System.Security.Claims;
 
 namespace BulkyBookWeb.Areas.Customer.Controllers
 {
@@ -25,7 +27,7 @@ namespace BulkyBookWeb.Areas.Customer.Controllers
 
 
 
-        //2action methods
+        //action methods
         public IActionResult Index()                    //default
         {
             //home
@@ -37,22 +39,62 @@ namespace BulkyBookWeb.Areas.Customer.Controllers
 
 
 
-        //2action methods
-        public IActionResult Details(int? id)                    //default
+        //action methods
+        public IActionResult Details(int? productId)   //selected product id from the index.chshtml home screen                
         {
 
-            ShoppingCart ShCartObject = new()
+            ShoppingCart ShCartObject = new()  //creating a new shopping cart object
             {
-  
-                Count = 1,
-                Product  = _unitOfWork.Product.GetFirstOrDefault(u => u.Id == id, includeProperties: "Category,CoverType")
-        };
 
- 
-                return View(ShCartObject);                              //home/index  
+                Count = 1,       //default starting Count
+                ProductId = (int)productId,                    //      ▼- Index of the Product table
+                Product = _unitOfWork.Product.GetFirstOrDefault(u => u.Id == productId, includeProperties: "Category,CoverType")
+            };
+
+
+
+
+
+            return View(ShCartObject);                              //home/index  
 
         }
 
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [Authorize]
+        public IActionResult Details(ShoppingCart obj)
+        {
+            var claimsIdentity = (ClaimsIdentity)User.Identity;
+            var claim = claimsIdentity.FindFirst(ClaimTypes.NameIdentifier);
+            obj.ApplicationUserId = claim.Value;
+            // ▼-foreign key in ShoppingCart table  
+            ShoppingCart cartFromDb = _unitOfWork.ShoppingCart.GetFirstOrDefault(u => u.ApplicationUserId == claim.Value
+                                                                                 && u.ProductId == obj.ProductId);
+            //if the logged in userid is the same
+            //as the one in the shopping cart
+            //         AND
+            //if Product Id in the table is the same as
+            //Product ID in the form
+            //         THEN
+            //assign cartFromDb object to the retrieved record
+            if (cartFromDb == null)                                     //add a shopping cart record
+            {
+
+                _unitOfWork.ShoppingCart.Add(obj);
+                _unitOfWork.Save();
+                HttpContext.Session.SetInt32(SD.SessionCart, _unitOfWork.ShoppingCart.GetAll    //get # of shopping cart records 
+                            (u => u.ApplicationUserId == claim.Value).ToList().Count);          //NOT count (number of items)   
+            }
+            else                                                      //don't add a shopping cart record just increment count
+            {                                                                                                  //(# of items)
+                //obj.Count = obj.Count + cartFromDb.Count   
+                _unitOfWork.ShoppingCart.IncrementCount(cartFromDb, obj.Count);
+            }
+            _unitOfWork.Save();
+            TempData["success"] = "Items Added to Shopping Cart";
+            return RedirectToAction(nameof(Index));
+
+        }
 
 
 

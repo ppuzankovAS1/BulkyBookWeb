@@ -2,12 +2,15 @@
 using BulkyBook.DataAccess.Repository.IRepository;
 using BulkyBook.Models;
 using BulkyBook.Models.ViewModels;
+using BulkyBook.Utility;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace BulkyBookWeb.Areas.Admin.Controllers
 {
     [Area("Admin")]
+    [Authorize(Roles = SD.Role_Admin)]
     public class ProductController : Controller
     {
         private readonly IUnitOfWork _unitOfwork;
@@ -128,92 +131,6 @@ namespace BulkyBookWeb.Areas.Admin.Controllers
 
 
 
-
-
-
-
-
-
-
-        ////GET- called by Index.cshtml 
-        //public IActionResult Delete(int? id)
-        //{
-
-        //    ProductVM productVM = new()
-        //    {
-        //        Product = new(),
-        //        CategoryList = _unitOfwork.Category.GetAll().Select(
-        //            i => new SelectListItem
-        //            {
-        //                Text = i.Name,
-        //                Value = i.Id.ToString()
-        //            }),
-        //        CoverTypeList = _unitOfwork.Category.GetAll().Select(
-        //            i => new SelectListItem
-        //            {
-        //                Text = i.Name,
-        //                Value = i.Id.ToString()
-        //            }),
-        //    };
-
-        //    if (id == null || id == 0)
-        //    {
-        //        return NotFound();
-        //    }
-        //    else
-        //    {
-        //        productVM.Product = _unitOfwork.Product.GetFirstOrDefault(u => u.Id == id);
-        //        return View(productVM);
-        //    }
-
-        //    return View(productVM);
-        //}
-
-        ////POST - called by Delete.cshtml
-        //[HttpPost]
-        //[ValidateAntiForgeryToken]
-        //public IActionResult DeletePOST(ProductVM obj)
-        //{
-
-        //    var ProductFromDb = _unitOfwork.Product.GetFirstOrDefault(u => u.Id == obj.Product.Id);
-        //    string wwwRootPath = _hostEnvironment.WebRootPath;
-
-
-
-        //    if (ProductFromDb.ImageUrl != null)   //is this checking the database or upsert page?
-        //    {
-        //        var oldImagePath = Path.Combine(wwwRootPath, ProductFromDb.ImageUrl.TrimStart('\\'));
-        //        if (System.IO.File.Exists(oldImagePath))
-        //        {
-        //            System.IO.File.Delete(oldImagePath);    //delete the previous image file
-        //        }
-        //    }
-
-
-
-
-        //    if (ProductFromDb == null)
-        //    {
-        //        return NotFound();
-        //    }
-        //    _unitOfwork.Product.Remove(ProductFromDb);
-        //    _unitOfwork.Save();
-        //    TempData["success"] = "Cover Type Deleted";
-        //    return RedirectToAction("Index");
-        //}
-
-
-
-
-
-
-
-
-
-
-
-
-
         #region API CALLS
         [HttpGet]
         public IActionResult GetAll()
@@ -247,11 +164,9 @@ namespace BulkyBookWeb.Areas.Admin.Controllers
 
 
         }
-
-
-
-
         #endregion
+
+
 
 
 

@@ -11,14 +11,15 @@ namespace BulkyBook.DataAccess.Repository
 {
     public class Repository<T> : IRepository<T> where T : class
     {
-        public readonly ApplicationDbContext _db;
+        private readonly ApplicationDbContext _db;
         internal DbSet<T> dbSet;
         public Repository(ApplicationDbContext db)  //db is the DbContext object
         {
             _db = db;                               //db is given a local reference _db
 
-            //_db.Products.Include(u => u.Category).Include(u=>u.CoverType);  
+            //_db.ShoppingCarts.Include(u => u.Product).Include(u => u.Product);
             this.dbSet = _db.Set<T>();               //Set<T> references DbSet class in _db.
+            //dbSet = (DbSet<T>)dbSet.AsNoTracking();
         }
 
         public void Add(T entity)
@@ -26,9 +27,14 @@ namespace BulkyBook.DataAccess.Repository
             dbSet.Add(entity);         //dbSet instead of _db
         }                              //_db.Add(entity)
 
-        public IEnumerable<T> GetAll(string? includeProperties = null)
+        public IEnumerable<T> GetAll(Expression<Func<T, bool>>? filter=null, string? includeProperties = null)
         {
             IQueryable<T> query = dbSet;  //I guess IQueryable can return specific records out of a 
+            if (filter != null)
+            {
+                query = query.Where(filter);  //query only when filter parameter is passed
+            }
+  
             if(includeProperties != null) //whole set 
             {
                 foreach(var includeProp in includeProperties.Split(new char[] {','}, StringSplitOptions.RemoveEmptyEntries))
@@ -39,9 +45,18 @@ namespace BulkyBook.DataAccess.Repository
             return query.ToList();        
         }
 
-        public T GetFirstOrDefault(Expression<Func<T, bool>> filter, string? includeProperties = null)
+        public T GetFirstOrDefault(Expression<Func<T, bool>> filter, string? includeProperties = null, bool tracked = true)
         {                                                                     //null is deafult user can inclue
-            IQueryable<T> query = dbSet;                                       //Category, CoverType or both
+            IQueryable<T> query;                                       //Category, CoverType or both
+            if (tracked)
+            {
+                query = dbSet;
+            }
+            else
+            {
+                query = dbSet.AsNoTracking();
+            }
+
             query = query.Where(filter);    //First the queryable object is set up
                                             //query.FirstOrDefault(filter) does not return Iuyeryable
                                             //Then it is given the record to return.

@@ -1,0 +1,65 @@
+﻿@model Company
+
+<form method="post">
+
+    <div class="border p-3 mt-4">
+        <h2 class="text-primary">@((Model.Id==0)?"Create": "Edit") Company</h2>
+    </div>
+    <input asp-for="Id" hidden />
+    <div class="mb-3 col-10">
+        <label asp-for="Name"></label>
+        <input style="border-color:#aaaaaa" asp-for="Name" class="form-control"/>
+        <span asp-validation-for="Name" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3 col-10">
+        <label asp-for="StreetAddress"></label>
+        <input style="border-color:#aaaaaa" asp-for="StreetAddress" class="form-control"/>
+        <span asp-validation-for="StreetAddress" class="text-danger"></span>
+    </div>    
+
+    <div class="mb-3 col-10">
+        <label asp-for="City"></label>
+        <input style="border-color:#aaaaaa" asp-for="City" class="form-control"/>
+        <span asp-validation-for="City" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3 col-10">
+        <label asp-for="State"></label>
+        <input style="border-color:#aaaaaa" asp-for="State" class="form-control"/>
+        <span asp-validation-for="State" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3 col-10">
+        <label asp-for="PostalCode"></label>
+        <input style="border-color:#aaaaaa" asp-for="PostalCode" class="form-control"/>
+        <span asp-validation-for="PostalCode" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3 col-10">
+        <label asp-for="PhoneNumber"></label>
+        <input style="border-color:#aaaaaa" asp-for="PhoneNumber" class="form-control"/>
+        <span asp-validation-for="PhoneNumber" class="text-danger"></span>
+    </div>
+
+    <div class="col-12">
+        @if (Model.Id == 0){
+            <button type="submit" class="btn btn-primary" style="width:150px">Create</button>
+        }
+        else{
+            <button type="submit" class="btn btn-primary" style="width:150px">Save</button>
+        }
+
+        <a class="mb-3 col-6" asp-controller="Company" asp-action="Index" class="btn btn-secondary" style="150px">
+            Back to List
+        </a>
+
+    </div>
+
+</form>
+
+@section Scripts{
+    @{
+        <partial name="_ValidationScriptsPartial.cshtml" />
+    }
+    }

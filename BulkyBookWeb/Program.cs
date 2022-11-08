@@ -3,6 +3,10 @@ using BulkyBook.DataAccess.Repository;
 using BulkyBook.DataAccess.Repository.IRepository;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity;
+using BulkyBook.Utility;
+using Microsoft.AspNetCore.Identity.UI.Services;
+using Stripe;
+using BulkyBook.DataAccess.DbInitializer;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -13,18 +17,24 @@ builder.Services.AddControllersWithViews();
 //This is a service for MVC application
 //Razor page application would have a different service.
 
-#pragma warning restore CS0436 // Type conflicts with imported type
+
 builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseSqlServer(
     builder.Configuration.GetConnectionString("DefaultConnection")
     ));
-#pragma warning restore CS0436 // Type conflicts with imported type
 
-builder.Services.AddDefaultIdentity<IdentityUser>()
+builder.Services.Configure<StripeSettings>(builder.Configuration.GetSection("StripeSettings"));
+
+builder.Services.AddIdentity<IdentityUser, IdentityRole>().AddDefaultTokenProviders()
     .AddEntityFrameworkStores<ApplicationDbContext>();
+
+
+
 
 //my class file name
 
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
+builder.Services.AddScoped<IDbInitializer, DbInitializer>();
+builder.Services.AddSingleton<IEmailSender, EmailSender>();
 
 
 
@@ -32,9 +42,36 @@ builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 
 
 builder.Services.AddRazorPages().AddRazorRuntimeCompilation();
-//builder.Services.AddRazorPages();
 
 
+
+
+
+builder.Services.AddAuthentication().AddFacebook(options => {
+                                                                        //primary facebook account
+    //options.AppId = "1112423836340070";                              
+    //options.AppSecret = "2628c793111898c47a0580643e8b83c0";
+    options.AppId = "625919302373508";                                  //second facebook account
+    options.AppSecret = "fd1c29d146bb548d10fd9dc2bac2178d";
+});
+
+
+
+
+builder.Services.ConfigureApplicationCookie(options =>
+{
+    options.LoginPath = $"/Identity/Account/Login";
+    options.LogoutPath = $"/Identity/Account/Logout";
+    options.AccessDeniedPath = $"/Identity/Account/AccessDenied";
+});
+
+builder.Services.AddDistributedMemoryCache();
+builder.Services.AddSession(options =>
+{
+    options.IdleTimeout = TimeSpan.FromMinutes(100);
+    options.Cookie.HttpOnly = true;
+    options.Cookie.IsEssential = true;
+});
 
 
     // perform some parallel operation
@@ -64,18 +101,36 @@ app.UseHttpsRedirection();
 //middleware that allows to use static files in wwwroot folder
 app.UseStaticFiles();
 
+StripeConfiguration.ApiKey = builder.Configuration.GetSection("StripeSettings:SecretKey").Get<string>();
+
+SeedDatabase();
+
 
 //this is also middleware
 app.UseRouting();
-app.UseAuthentication();;
+app.UseAuthentication();
+
 
 //app.UseAuthentication(); //note Authentication must be done
                          //before Authorization 
  //middleware
 app.UseAuthorization();
+app.UseSession();
+app.MapRazorPages();
 
 app.MapControllerRoute(
     name: "default",
     pattern: "{area=Customer}/{controller=Home}/{action=Index}/{id?}");
 
 app.Run();
+
+
+void SeedDatabase()
+{
+    using (var scope = app.Services.CreateScope())
+    {
+        var dbInitializer = scope.ServiceProvider.GetRequiredService<IDbInitializer>();
+        dbInitializer.Initialize();
+    }
+
+}
